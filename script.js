@@ -6,37 +6,42 @@ const btnNova = document.getElementById('btn-nova')
 
 // EVENTOS QUE FAZ O CARD GIRAR 
 cardInner.addEventListener('click', () => {
-    // Corrigido: Removido o espaço interno da classe arbitrária
     cardInner.classList.toggle('[transform:rotateY(180deg)]')
 })
 
-// Adicionado evento ao botão para buscar nova charada
-
+// Inicializa a primeira charada
 buscarCharada()
 
-// FUNÇAO QUE IRA BUSCAR AS CHARADAS BACKEND
 async function buscarCharada() {
     try {
-        // Implementado o fetch para uma API de charadas
-        const url = 'https://api-charadas-backend-01-ezm1sx3mj-pedro-mrs15s-projects.vercel.app'
+        // 1. Resetar o card para a posição inicial (Pergunta) antes de carregar a nova
+        cardInner.classList.remove('[transform:rotateY(180deg)]')
+
+        // 2. Usando a URL de produção correta
+        const url = 'https://api-charadas-backend-01.vercel.app'
         const endPoint = '/charadas/aleatoria'
 
-        const respostaAPI = await fetch(url+endPoint)
-        console.log(respostaAPI)
+        campoPergunta.textContent = 'Carregando...'
+
+        const respostaAPI = await fetch(url + endPoint)
+        
+        if (!respostaAPI.ok) {
+            throw new Error('Erro na requisição')
+        }
 
         const dados = await respostaAPI.json()
-        console.log(dados.pergunta)
-        console.log(dados.resposta)
 
+        // 3. Inserindo os dados nos campos
         campoPergunta.textContent = dados.pergunta 
         campoResposta.textContent = dados.resposta
 
     } catch (erro) {
-        campoPergunta.textContent = 'Erro ao conectar com o servidor backend'
-        console.error('Erro ao buscar charada:', erro);
+        campoPergunta.textContent = 'Erro ao conectar com o servidor'
+        console.error('Erro ao buscar charada:', erro)
     }
 }
 
-btnNova.addEventListener('click', () => {
+btnNova.addEventListener('click', (e) => {
+    e.stopPropagation() // Evita que o clique no botão dispare o giro do card
     buscarCharada()
 })
